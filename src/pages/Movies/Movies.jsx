@@ -9,27 +9,27 @@ const Movies = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const movieQuery = searchParams.get('q') ?? '';
 
-  const updateData = () => {
-    fetchMoviesBySearchQuery(searchData).then(response => {
-      setData(response);
-    });
-  };
-
   useEffect(() => {
-    fetchMoviesBySearchQuery(movieQuery).then(response => {
-      setData(response);
-    });
+    const fetchData = async () => {
+      if (movieQuery !== '') {
+        const response = await fetchMoviesBySearchQuery(movieQuery);
+        setData(response);
+      }
+    };
+    fetchData();
   }, [movieQuery]);
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    if (searchData !== '') {
+      const response = await fetchMoviesBySearchQuery(searchData);
+      setData(response);
+      setSearchParams({ q: searchData });
+    }
+  };
 
   const handleInputChange = e => {
     setSearchData(e.target.value);
-    const nextParams = e.target.value !== '' ? { q: e.target.value } : {};
-    setSearchParams(nextParams);
-  };
-
-  const handleSubmit = e => {
-    e.preventDefault();
-    updateData();
   };
 
   return (
@@ -40,7 +40,7 @@ const Movies = () => {
             type="text"
             name="search"
             onChange={handleInputChange}
-            value={movieQuery}
+            value={searchData}
             required
           />
         </label>
@@ -49,7 +49,7 @@ const Movies = () => {
       <div>
         <ul>
           {data.results?.length === 0 ? (
-            <p>{`There is no movies`}</p>
+            <p>{`There are no movies`}</p>
           ) : (
             data.results?.map(movie => {
               return (
